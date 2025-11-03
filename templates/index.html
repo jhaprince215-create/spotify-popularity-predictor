@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Spotify Hit Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+        
+        .slider-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .value-display {
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .result.hit {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+        
+        .result.miss {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-weight: bold;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Spotify Hit Predictor</h1>
+        <p class="subtitle">Will your song be a HIT?</p>
+        
+        <form id="predictionForm">
+            <div class="form-group">
+                <label>💃 Danceability</label>
+                <div class="slider-container">
+                    <input type="range" id="danceability" min="0" max="1" step="0.01" value="0.5">
+                    <span class="value-display" id="danceability-val">0.50</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>⚡ Energy</label>
+                <div class="slider-container">
+                    <input type="range" id="energy" min="0" max="1" step="0.01" value="0.5">
+                    <span class="value-display" id="energy-val">0.50</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>😊 Valence (Happiness)</label>
+                <div class="slider-container">
+                    <input type="range" id="valence" min="0" max="1" step="0.01" value="0.5">
+                    <span class="value-display" id="valence-val">0.50</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>🎼 Tempo (BPM)</label>
+                <div class="slider-container">
+                    <input type="range" id="tempo" min="50" max="200" step="1" value="120">
+                    <span class="value-display" id="tempo-val">120</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>🎸 Acousticness</label>
+                <div class="slider-container">
+                    <input type="range" id="acousticness" min="0" max="1" step="0.01" value="0.5">
+                    <span class="value-display" id="acousticness-val">0.50</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>🎹 Instrumentalness</label>
+                <div class="slider-container">
+                    <input type="range" id="instrumentalness" min="0" max="1" step="0.01" value="0.5">
+                    <span class="value-display" id="instrumentalness-val">0.50</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>🎤 Speechiness</label>
+                <div class="slider-container">
+                    <input type="range" id="speechiness" min="0" max="1" step="0.01" value="0.5">
+                    <span class="value-display" id="speechiness-val">0.50</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>🎤 Liveness</label>
+                <div class="slider-container">
+                    <input type="range" id="liveness" min="0" max="1" step="0.01" value="0.5">
+                    <span class="value-display" id="liveness-val">0.50</span>
+                </div>
+            </div>
+            
+            <button type="submit">🔮 Predict If This Will Be Popular!</button>
+        </form>
+        
+        <div class="loading" id="loading">Predicting...</div>
+        <div class="result" id="result"></div>
+    </div>
+    
+    <script>
+        document.querySelectorAll('input[type="range"]').forEach(input => {
+            input.addEventListener('input', function() {
+                const id = this.id;
+                const value = this.value;
+                const displayValue = id === 'tempo' ? value : parseFloat(value).toFixed(2);
+                document.getElementById(id + '-val').textContent = displayValue;
+            });
+        });
+        
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            const data = {
+                danceability: document.getElementById('danceability').value,
+                energy: document.getElementById('energy').value,
+                valence: document.getElementById('valence').value,
+                tempo: document.getElementById('tempo').value,
+                acousticness: document.getElementById('acousticness').value,
+                instrumentalness: document.getElementById('instrumentalness').value,
+                speechiness: document.getElementById('speechiness').value,
+                liveness: document.getElementById('liveness').value
+            };
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const json = await response.json();
+                
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.textContent = json.prediction;
+                result.className = json.is_popular ? 'result hit' : 'result miss';
+            } catch (error) {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.textContent = 'Error: ' + error.message;
+                result.className = 'result miss';
+            }
+        });
+    </script>
+</body>
+</html>
